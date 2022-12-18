@@ -64,7 +64,7 @@ jobs:
           platforms: linux/arm64/v8
           tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/arm64:${{github.run_number}}"
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
+          push: ${{ env.PUSH }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -107,7 +107,7 @@ jobs:
           context: ./${{ inputs.context-directory }}
           tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/amd64:${{github.run_number}}"
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
+          push: ${{ env.PUSH }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
