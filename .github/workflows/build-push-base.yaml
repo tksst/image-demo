@@ -1,4 +1,4 @@
-name: build and push phoronix-bench-image-base
+name: build and push image-demo
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
 
 jobs:
   build-and-push:
-    name: Build and Push phoronix-bench-image-base
+    name: Build and Push image-demo
     permissions:
       contents: read
       packages: write
@@ -24,5 +24,5 @@ jobs:
       id-token: write
     uses: ./.github/workflows/build-push.yaml
     with:
-      image-name: phoronix-bench-image-base
+      image-name: image-demo
       context-directory: base
