@@ -90,7 +90,6 @@ jobs:
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5 # tag=v3.2.0
         with:
           context: ./${{ inputs.context-directory }}
-          platforms: linux/amd64/v8
           tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/amd64:${{github.run_number}}"
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha
