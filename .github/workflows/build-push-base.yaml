@@ -1,0 +1,28 @@
+name: build and push phoronix-bench-image-base
+
+on:
+  push:
+    paths:
+      - "base/**"
+      - ".github/workflows/build-push.yaml"
+      - ".github/workflows/build-push-base.yaml"
+  pull_request:
+    paths:
+      - "base/**"
+      - ".github/workflows/build-push.yaml"
+      - ".github/workflows/build-push-base.yaml"
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Build and Push phoronix-bench-image-base
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    uses: ./.github/workflows/build-push.yaml
+    with:
+      image-name: phoronix-bench-image-base
+      context-directory: base
