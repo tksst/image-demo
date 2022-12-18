@@ -90,7 +90,7 @@ jobs:
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5 # tag=v3.2.0
         with:
           context: ./${{ inputs.context-directory }}
-          platforms: linux/arm64/v8
+          platforms: linux/amd64/v8
           tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/amd64:${{github.run_number}}"
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha
@@ -143,5 +143,7 @@ jobs:
 
           docker pull "$amd64_image"
           docker pull "$arm64_image"
-          docker manifest create "$multiarch_image" "$amd64_image" "$arm64_image"
-          docker manifest push "$multiarch_image"
+          for a in $multiarch_image; do
+            docker manifest create "$a" "$amd64_image" "$arm64_image"
+            docker manifest push "$a"
+          done
