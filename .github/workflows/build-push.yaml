@@ -166,17 +166,7 @@ jobs:
           done
 
       - name: Delete image
-        uses: bots-house/ghcr-delete-image-action@22bf76ed038fa077092ceeaab338c0bb6878f374 # tag=v1.0.1
-        with:
-          owner: ${{ github.actor }}
-          name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/amd64
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{github.run_number}}
-
-      - name: Delete image
-        uses: bots-house/ghcr-delete-image-action@22bf76ed038fa077092ceeaab338c0bb6878f374 # tag=v1.0.1
-        with:
-          owner: ${{ github.actor }}
-          name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/arm64
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{github.run_number}}
+        shell: node {0}
+        run: |
+          const core = require("@actions/core");
+          const github = require("@actions/github");
