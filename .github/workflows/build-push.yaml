@@ -63,7 +63,7 @@ jobs:
           context: ./${{ inputs.context-directory }}
           platforms: linux/arm64/v8
           labels: ${{ steps.meta.outputs.labels }}
-          push: ${{ env.PUSH }}
+          # push: ${{ env.PUSH }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -105,7 +105,7 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           labels: ${{ steps.meta.outputs.labels }}
-          push: ${{ env.PUSH }}
+          # push: ${{ env.PUSH }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
