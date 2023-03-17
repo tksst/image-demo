@@ -149,10 +149,7 @@ jobs:
           arm64_image="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/build-cache-${{github.run_number}}:arm64"
           multiarch_image="${{ steps.meta.outputs.tags }}"
 
-          docker pull "$amd64_image"
-          docker pull "$arm64_image"
           for a in $multiarch_image; do
-            echo "creating manifest for $a"
             docker manifest create "$a" "$amd64_image" "$arm64_image"
             docker manifest push "$a"
             echo
