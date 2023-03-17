@@ -21,7 +21,7 @@ env:
   PUSH: ${{ github.event_name != 'pull_request' && ( github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' ) }}
 
 jobs:
-  build-push-arm64:
+  build-cache-arm64:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,8 +51,8 @@ jobs:
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@57396166ad8aefe6098280995947635806a0e6ea # tag=v4.1.1
-        # with:
-        #   images: dummy
+        with:
+          images: dummy
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -67,7 +67,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-push-amd64:
+  build-cache-amd64:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -94,8 +94,8 @@ jobs:
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@57396166ad8aefe6098280995947635806a0e6ea # tag=v4.1.1
-        # with:
-        #   images: dummy
+        with:
+          images: dummy
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
