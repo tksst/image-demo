@@ -118,11 +118,12 @@ jobs:
     permissions:
       contents: read
       packages: write
-    if: env.PUSH == 'true'
+    if: ${{ github.event_name != 'pull_request' && ( github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' ) }}
     steps:
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
+        if: env.PUSH == 'true'
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # tag=v2.1.0
         with:
           registry: ${{ env.REGISTRY }}
