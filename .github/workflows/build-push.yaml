@@ -156,6 +156,6 @@ jobs:
 
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: "${{ env.IMAGE_NAME }}/build-cache-${{github.run_number}}"
+          package-name: "image-demo/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
           package-type: "container"
           min-versions-to-keep: 0
