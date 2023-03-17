@@ -150,8 +150,7 @@ jobs:
           multiarch_image="${{ steps.meta.outputs.tags }}"
 
           for a in $multiarch_image; do
-            docker manifest create "$a" "$amd64_image" "$arm64_image"
-            docker manifest push "$a"
+            docker buildx imagetools create -t "$a" "$amd64_image" "$arm64_image"
             echo
           done
 
