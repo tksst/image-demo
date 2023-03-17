@@ -56,8 +56,8 @@ jobs:
           context: ./${{ inputs.context-directory }}
           platforms: linux/arm64/v8
           push: false
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   build-cache-amd64:
     runs-on: ubuntu-latest
@@ -91,8 +91,8 @@ jobs:
           context: ./${{ inputs.context-directory }}
           platforms: linux/amd64
           push: false
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   build-push:
     runs-on: ubuntu-latest
