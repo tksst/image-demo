@@ -64,8 +64,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}:arm64
           labels: ${{ steps.meta.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-arm64
+          cache-from: type=gha,scope=${{ github.ref_name }}-arm64
+          cache-to: type=gha,scope=${{ github.ref_name }}-arm64,mode=max
 
   build-amd64:
     runs-on: ubuntu-latest
@@ -107,8 +107,8 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}:amd64
           labels: ${{ steps.meta.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-amd64
+          cache-from: type=gha,scope=${{ github.ref_name }}-amd64
+          cache-to: type=gha,scope=${{ github.ref_name }}-amd64,mode=max
 
   combine-images:
     runs-on: ubuntu-latest
