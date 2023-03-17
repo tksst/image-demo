@@ -156,13 +156,14 @@ jobs:
             echo
           done
 
-      - run: |
+      - id: reponame
+        run: |
           set -e
           repository="${{ github.repository }}"
-          echo "${repository#${{ github.repository_owner }}/}"
+          echo "reponame=${repository#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
 
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: "image-demo/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
+          package-name: "${{ steps.reponame.outputs.reponame }}/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
           package-type: "container"
           min-versions-to-keep: 0
