@@ -55,9 +55,9 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           platforms: linux/arm64/v8
-          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:temp-arm64
+          outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   build-cache-amd64:
     runs-on: ubuntu-latest
@@ -90,9 +90,9 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           platforms: linux/amd64
-          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:temp-amd64
+          outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   build-push:
     needs:
@@ -123,6 +123,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:temp-arm64
+      - run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:temp-amd64
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -147,7 +150,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
-          cache-from: type=gha
           cache-to: type=gha,mode=max
           # cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
