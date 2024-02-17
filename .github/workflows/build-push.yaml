@@ -179,9 +179,9 @@ jobs:
           repository="${{ github.repository }}"
           echo "reponame=${repository#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
 
-      - uses: actions/delete-package-versions@v4
-        continue-on-error: true
-        with:
-          package-name: "${{ steps.reponame.outputs.reponame }}/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
-          package-type: "container"
-          min-versions-to-keep: 0
+      # - uses: actions/delete-package-versions@v4
+      #   continue-on-error: true
+      #   with:
+      #     package-name: "${{ steps.reponame.outputs.reponame }}/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
+      #     package-type: "container"
+      #     min-versions-to-keep: 0
