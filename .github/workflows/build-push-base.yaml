@@ -17,6 +17,7 @@ jobs:
   build-and-push:
     name: Build and Push image-demo
     permissions:
+      actions: read
       contents: read
       packages: write
       # This is used to complete the identity challenge

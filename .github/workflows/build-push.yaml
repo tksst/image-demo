@@ -185,3 +185,13 @@ jobs:
       #     package-name: "${{ steps.reponame.outputs.reponame }}/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
       #     package-type: "container"
       #     min-versions-to-keep: 0
+
+  action-timeline:
+    needs:
+      - combine-images
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+    timeout-minutes: 10
+    steps:
+      - uses: Kesin11/actions-timeline@v2
