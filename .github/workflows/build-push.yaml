@@ -56,9 +56,6 @@ jobs:
       packages: write
 
     steps:
-      - run: echo ${{ needs.meta-data.outputs.tags }}
-      - run: echo ${{ needs.meta-data.outputs.labels }}
-  
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -109,9 +106,6 @@ jobs:
       packages: write
 
     steps:
-      - run: echo ${{ needs.meta-data.outputs.tags }}
-      - run: echo ${{ needs.meta-data.outputs.labels }}
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
