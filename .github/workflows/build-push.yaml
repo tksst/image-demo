@@ -29,13 +29,18 @@ jobs:
     outputs:
       tags: ${{ steps.docker-metadata.outputs.tags }}
       labels: ${{ steps.docker-metadata.outputs.labels }}
-      build-cache-name: ${{ steps.foo.outputs.build-cache-name }}
+      build-cache-name-1: ${{ steps.foo.outputs.build-cache-name-1 }}
+      build-cache-name-2: ${{ steps.foo.outputs.build-cache-name-2 }}
 
     steps:
 
       - id: foo
         run: |
-          echo "build-cache-name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}" | tee -a "$GITHUB_OUTPUT"
+          set -e
+          set -o pipefail
+          foo=${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}
+          echo "build-cache-name-1=${{ env.REGISTRY }}/$foo" | tee -a "$GITHUB_OUTPUT"
+          echo "build-cache-name-2=${foo#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
@@ -94,7 +99,7 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           platforms: ${{ env.arch }}
-          tags: ${{ needs.meta-data.outputs.build-cache-name }}:${{ steps.arch-hyphen.outputs.arch-hyphen }}
+          tags: ${{ needs.meta-data.outputs.build-cache-name-1 }}:${{ steps.arch-hyphen.outputs.arch-hyphen }}
           labels: ${{ needs.meta-data.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha,scope=${{ github.ref_name }}-${{ steps.arch-hyphen.outputs.arch-hyphen }}
@@ -150,7 +155,7 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           platforms: ${{ env.arch }}
-          tags: ${{ needs.meta-data.outputs.build-cache-name }}:${{ steps.arch-hyphen.outputs.arch-hyphen }}
+          tags: ${{ needs.meta-data.outputs.build-cache-name-1 }}:${{ steps.arch-hyphen.outputs.arch-hyphen }}
           labels: ${{ needs.meta-data.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha,scope=${{ github.ref_name }}-${{ steps.arch-hyphen.outputs.arch-hyphen }}
@@ -170,7 +175,6 @@ jobs:
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
-        if: env.PUSH == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -181,8 +185,8 @@ jobs:
         run: |
           set -e
 
-          amd64_image="${{ needs.meta-data.outputs.build-cache-name }}:linux-amd64"
-          arm64_image="${{ needs.meta-data.outputs.build-cache-name }}:linux-arm64"
+          amd64_image="${{ needs.meta-data.outputs.build-cache-name-1 }}:linux-amd64"
+          arm64_image="${{ needs.meta-data.outputs.build-cache-name-1 }}:linux-arm64"
           multiarch_image="${{ needs.meta-data.outputs.tags }}"
 
           for a in $multiarch_image; do
@@ -190,16 +194,10 @@ jobs:
             echo
           done
 
-      - id: reponame
-        run: |
-          set -e
-          repository="${{ github.repository }}"
-          echo "reponame=${repository#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
-
       - uses: actions/delete-package-versions@v4
         continue-on-error: true
         with:
-          package-name: "${{ steps.reponame.outputs.reponame }}/${{ inputs.image-name }}/build-cache-${{github.run_number}}"
+          package-name: "${{ needs.meta-data.outputs.build-cache-name-2 }}"
           package-type: "container"
           min-versions-to-keep: 0
 
