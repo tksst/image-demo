@@ -43,8 +43,11 @@ runs:
 
     - name: Generate cache scope
       id: generate-cache-scope
-      run: echo "cache-scope=${{ github.ref_name }}-${{ inputs.arch }}" | sed 's|/|-|g' | tee -a "$GITHUB_OUTPUT"
+      run: echo "cache-scope=${ref}-${arch}" | sed 's|/|-|g' | tee -a "$GITHUB_OUTPUT"
       shell: bash
+      env:
+        ref: ${{ github.ref_name }}
+        arch: ${{ inputs.arch }}
 
     # Build and push Docker image with Buildx (don't push on PR)
     # https://github.com/docker/build-push-action

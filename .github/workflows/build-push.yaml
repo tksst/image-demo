@@ -41,14 +41,16 @@ jobs:
           set -o pipefail
           set -o posix
           
-          x=${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}
-          reg=${{ env.REGISTRY }}
+          x="${IMAGE_NAME}/build-cache-${run_number}"
 
           (
-            echo "build-cache-name-amd64=${reg}/${x}:amd64"
-            echo "build-cache-name-arm64=${reg}/${x}:arm64"
-            echo "build-cache-pkg-name=${x#${{ github.repository_owner }}/}"
+            echo "build-cache-name-amd64=${REGISTRY}/${x}:amd64"
+            echo "build-cache-name-arm64=${REGISTRY}/${x}:arm64"
+            echo "build-cache-pkg-name=${x#${repository_owner}/}"
           ) | tee -a "$GITHUB_OUTPUT"
+        env:
+          run_number: ${{ github.run_number }}
+          repository_owner: ${{ github.repository_owner }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
@@ -147,14 +149,14 @@ jobs:
           set -o pipefail
           set -o posix
 
-          amd64_image="${{ needs.meta-data.outputs.build-cache-name-amd64 }}"
-          arm64_image="${{ needs.meta-data.outputs.build-cache-name-arm64 }}"
-          multiarch_image="${{ needs.meta-data.outputs.tags }}"
-
           for a in $multiarch_image; do
             docker buildx imagetools create -t "$a" "$amd64_image" "$arm64_image"
             echo
           done
+        env:
+          amd64_image: ${{ needs.meta-data.outputs.build-cache-name-amd64 }}
+          arm64_image: ${{ needs.meta-data.outputs.build-cache-name-arm64 }}
+          multiarch_image: ${{ needs.meta-data.outputs.tags }}
 
   fix-up:
     needs:
