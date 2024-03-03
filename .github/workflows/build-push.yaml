@@ -46,7 +46,7 @@ jobs:
           (
             echo "build-cache-name-amd64=${REGISTRY}/${x}:amd64"
             echo "build-cache-name-arm64=${REGISTRY}/${x}:arm64"
-            echo "build-cache-pkg-name=${x#${repository_owner}/}"
+            echo "build-cache-pkg-name=${x#"${repository_owner}"/}"
           ) | tee -a "$GITHUB_OUTPUT"
         env:
           run_number: ${{ github.run_number }}
