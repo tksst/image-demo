@@ -160,18 +160,4 @@ jobs:
           package-type: "container"
           min-versions-to-keep: 0
 
-
-  action-timeline:
-    needs:
-      - meta-data
-      - build-amd64
-      - build-arm64
-      - combine-images
-      - fix-up
-    if: ${{ always() }}
-    runs-on: ubuntu-22.04
-    permissions:
-      actions: read
-    timeout-minutes: 10
-    steps:
       - uses: Kesin11/actions-timeline@v2
