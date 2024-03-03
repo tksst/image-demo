@@ -17,8 +17,6 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}/${{ inputs.image-name }}
-  # デフォルトブランチかタグの時のみPUSHする
-  PUSH: ${{ github.event_name != 'pull_request' && ( github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' ) }}
 
 jobs:
 
@@ -32,6 +30,8 @@ jobs:
       build-cache-name-amd64: ${{ steps.foo.outputs.build-cache-name-amd64 }}
       build-cache-name-arm64: ${{ steps.foo.outputs.build-cache-name-arm64 }}
       build-cache-pkg-name:  ${{ steps.foo.outputs.build-cache-pkg-name }}
+      # デフォルトブランチかタグの時のみPUSHする
+      push: ${{ github.event_name != 'pull_request' && ( github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' ) }}
 
     steps:
 
@@ -84,7 +84,7 @@ jobs:
 
       - uses: ./.github/build/
         with:
-          push: ${{ env.PUSH }}
+          push: ${{ needs.meta-data.outputs.push }}
           arch: linux/arm64
           registry: ${{ env.REGISTRY }}
           context-directory: ${{ inputs.context-directory }}
@@ -110,7 +110,7 @@ jobs:
 
       - uses: ./.github/build/
         with:
-          push: ${{ env.PUSH }}
+          push: ${{ needs.meta-data.outputs.push }}
           arch: linux/amd64
           registry: ${{ env.REGISTRY }}
           context-directory: ${{ inputs.context-directory }}
@@ -126,7 +126,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    if: ${{ github.event_name != 'pull_request' && ( github.ref_name == github.event.repository.default_branch || github.ref_type == 'tag' ) }}
+    if: needs.meta-data.outputs.push == 'true'
     steps:
       - name: Collect Workflow Telemetry
         uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2.0.0
@@ -174,7 +174,7 @@ jobs:
     steps:
       - uses: actions/delete-package-versions@v4
         continue-on-error: true
-        if: env.PUSH == 'true'
+        if: needs.meta-data.outputs.push == 'true'
         with:
           package-name: ${{ needs.meta-data.outputs.build-cache-pkg-name }}
           package-type: "container"
