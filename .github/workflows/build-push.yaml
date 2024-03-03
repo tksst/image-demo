@@ -148,6 +148,7 @@ jobs:
   action-timeline:
     needs:
       - combine-images
+    if: ${{ always() }}
     runs-on: ubuntu-22.04
     permissions:
       actions: read
