@@ -65,27 +65,43 @@ jobs:
 
   build-arm64:
     needs:
-      - meta-data
-    uses: ./.github/workflows/build.yaml
-    with:
-      push: ${{ env.PUSH }}
-      arch: linux/arm64
-      registry: ${{ env.REGISTRY }}
-      context-directory: ${{ inputs.context-directory }}
-      build-cache-name: ${{ needs.meta-data.outputs.build-cache-name-arm64 }}
-      labels: ${{ needs.meta-data.outputs.labels }}
+      - meta-data    
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./.github/build/
+        with:
+          push: ${{ env.PUSH }}
+          arch: linux/arm64
+          registry: ${{ env.REGISTRY }}
+          context-directory: ${{ inputs.context-directory }}
+          build-cache-name: ${{ needs.meta-data.outputs.build-cache-name-arm64 }}
+          labels: ${{ needs.meta-data.outputs.labels }}
 
   build-amd64:
     needs:
       - meta-data
-    uses: ./.github/workflows/build.yaml
-    with:
-      push: ${{ env.PUSH }}
-      arch: linux/amd64
-      registry: ${{ env.REGISTRY }}
-      context-directory: ${{ inputs.context-directory }}
-      build-cache-name: ${{ needs.meta-data.outputs.build-cache-name-arm64 }}
-      labels: ${{ needs.meta-data.outputs.labels }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./.github/build/
+        with:
+          push: ${{ env.PUSH }}
+          arch: linux/amd64
+          registry: ${{ env.REGISTRY }}
+          context-directory: ${{ inputs.context-directory }}
+          build-cache-name: ${{ needs.meta-data.outputs.build-cache-name-amd64 }}
+          labels: ${{ needs.meta-data.outputs.labels }}
 
   combine-images:
     runs-on: ubuntu-latest
