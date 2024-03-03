@@ -29,17 +29,8 @@ jobs:
     outputs:
       tags: ${{ steps.docker-metadata.outputs.tags }}
       labels: ${{ steps.docker-metadata.outputs.labels }}
-      build-cache-name-2: ${{ steps.foo.outputs.build-cache-name-2 }}
 
     steps:
-
-      - id: foo
-        run: |
-          set -e
-          set -o pipefail
-          foo=${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}
-          echo "build-cache-name-2=${foo#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
-
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -202,10 +193,8 @@ jobs:
       
       - id: build-cache-name-2
         run: |
-          foo=${{ needs.build-amd64.outputs.build-cache-name }}
-          echo "amd64=${foo#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
-          bar="${{ needs.build-arm64.outputs.build-cache-name }}"
-          echo "arm64=${bar#${{ github.repository_owner }}/}" | tee -a "$GITHUB_OUTPUT"
+          ( echo -n "amd64=" && echo ${{ needs.build-amd64.outputs.build-cache-name }} | perl -pe 's|^ghcr.io/${{ github.repository_owner }}/([^:]+):.+|$1|g' ) | tee -a "$GITHUB_OUTPUT"
+          ( echo -n "arm64=" && echo ${{ needs.build-arm64.outputs.build-cache-name }} | perl -pe 's|^ghcr.io/${{ github.repository_owner }}/([^:]+):.+|$1|g' ) | tee -a "$GITHUB_OUTPUT"
 
       - uses: actions/delete-package-versions@v4
         continue-on-error: true
