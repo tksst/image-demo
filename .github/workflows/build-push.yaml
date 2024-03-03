@@ -85,7 +85,7 @@ jobs:
       
       - name: Generate build cache name and tag
         id: generate-build-cache-name
-        run: echo "name=${{ env.REGISTRY }}/${{ github.repository }}/build-cache-$( dd if=/dev/urandom bs=15 count=1 | basenc --base32 --wrap=0 | tr '[A-Z]' '[a-z]' ):latest" | tee -a "$GITHUB_OUTPUT"
+        run: echo "name=${{ env.REGISTRY }}/${{ github.repository }}/build-cache-$( dd if=/dev/urandom bs=15 count=1 | basenc --base32 --wrap=0 | tr '[A-Z]' '[a-z]' ):foobar" | tee -a "$GITHUB_OUTPUT"
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -142,7 +142,7 @@ jobs:
 
       - name: Generate build cache name and tag
         id: generate-build-cache-name
-        run: echo "name=${{ env.REGISTRY }}/${{ github.repository }}/build-cache-$( dd if=/dev/urandom bs=15 count=1 | basenc --base32 --wrap=0 | tr '[A-Z]' '[a-z]' ):latest" | tee -a "$GITHUB_OUTPUT"
+        run: echo "name=${{ env.REGISTRY }}/${{ github.repository }}/build-cache-$( dd if=/dev/urandom bs=15 count=1 | basenc --base32 --wrap=0 | tr '[A-Z]' '[a-z]' ):foobar" | tee -a "$GITHUB_OUTPUT"
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
