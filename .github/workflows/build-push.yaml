@@ -29,8 +29,27 @@ jobs:
     outputs:
       tags: ${{ steps.docker-metadata.outputs.tags }}
       labels: ${{ steps.docker-metadata.outputs.labels }}
+      build-cache-name-amd64: ${{ steps.foo.outputs.build-cache-name-amd64 }}
+      build-cache-name-arm64: ${{ steps.foo.outputs.build-cache-name-arm64 }}
+      build-cache-pkg-name:  ${{ steps.foo.outputs.build-cache-pkg-name }}
 
     steps:
+
+      - id: foo
+        run: |
+          set -eu
+          set -o pipefail
+          set -o posix
+          
+          x=${{ env.IMAGE_NAME }}/build-cache-${{ github.run_number }}
+          reg=${{ env.REGISTRY }}
+
+          (
+            echo "build-cache-name-amd64=${reg}/${x}:amd64"
+            echo "build-cache-name-arm64=${reg}/${x}:arm64"
+            echo "build-cache-pkg-name=${x#${{ github.repository_owner }}/}"
+          ) | tee -a "$GITHUB_OUTPUT"
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -54,8 +73,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      build-cache-name: ${{ steps.generate-build-cache-name.outputs.name }}
 
     steps:
       - name: Checkout repository
@@ -79,13 +96,7 @@ jobs:
 
       - name: Generate cache scope
         id: generate-cache-scope
-        run: |
-          arch=${{ env.arch }}
-          echo "cache-scope=${{ github.ref_name }}-${arch//\//-}" | tee -a "$GITHUB_OUTPUT"
-      
-      - name: Generate build cache name and tag
-        id: generate-build-cache-name
-        run: echo "name=${{ env.REGISTRY }}/${{ github.repository }}/build-cache-$( dd if=/dev/urandom bs=15 count=1 | basenc --base32 --wrap=0 | tr '[A-Z]' '[a-z]' ):foobar" | tee -a "$GITHUB_OUTPUT"
+        run: echo "cache-scope=${{ github.ref_name }}-${{ env.arch }}" | sed 's|/|-|g' | tee -a "$GITHUB_OUTPUT"
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -95,7 +106,7 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           platforms: ${{ env.arch }}
-          tags: ${{ steps.generate-build-cache-name.outputs.name }}
+          tags: ${{ needs.meta-data.outputs.build-cache-name-arm64 }}
           labels: ${{ needs.meta-data.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha,scope=${{ steps.generate-cache-scope.outputs.cache-scope }}
@@ -111,8 +122,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      build-cache-name: ${{ steps.generate-build-cache-name.outputs.name }}
 
     steps:
       - name: Checkout repository
@@ -136,13 +145,7 @@ jobs:
 
       - name: Generate cache scope
         id: generate-cache-scope
-        run: |
-          arch=${{ env.arch }}
-          echo "cache-scope=${{ github.ref_name }}-${arch//\//-}" | tee -a "$GITHUB_OUTPUT"
-
-      - name: Generate build cache name and tag
-        id: generate-build-cache-name
-        run: echo "name=${{ env.REGISTRY }}/${{ github.repository }}/build-cache-$( dd if=/dev/urandom bs=15 count=1 | basenc --base32 --wrap=0 | tr '[A-Z]' '[a-z]' ):foobar" | tee -a "$GITHUB_OUTPUT"
+        run: echo "cache-scope=${{ github.ref_name }}-${{ env.arch }}" | sed 's|/|-|g' | tee -a "$GITHUB_OUTPUT"
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -152,7 +155,7 @@ jobs:
         with:
           context: ./${{ inputs.context-directory }}
           platforms: ${{ env.arch }}
-          tags: ${{ steps.generate-build-cache-name.outputs.name }}
+          tags: ${{ needs.meta-data.outputs.build-cache-name-amd64 }}
           labels: ${{ needs.meta-data.outputs.labels }}
           outputs: ${{ env.PUSH == 'true' && 'type=registry' || 'type=oci,dest=/tmp/image.tar' }}
           cache-from: type=gha,scope=${{ steps.generate-cache-scope.outputs.cache-scope }}
@@ -180,33 +183,23 @@ jobs:
 
       - name: combine images
         run: |
-          set -e
+          set -eu
+          set -o pipefail
+          set -o posix
 
-          amd64_image="${{ needs.build-amd64.outputs.build-cache-name }}"
-          arm64_image="${{ needs.build-arm64.outputs.build-cache-name }}"
+          amd64_image="${{ needs.meta-data.outputs.build-cache-name-amd64 }}"
+          arm64_image="${{ needs.meta-data.outputs.build-cache-name-arm64 }}"
           multiarch_image="${{ needs.meta-data.outputs.tags }}"
 
           for a in $multiarch_image; do
             docker buildx imagetools create -t "$a" "$amd64_image" "$arm64_image"
             echo
           done
-      
-      - id: build-cache-name-2
-        run: |
-          ( echo -n "amd64=" && echo ${{ needs.build-amd64.outputs.build-cache-name }} | perl -pe 's|^ghcr.io/${{ github.repository_owner }}/([^:]+):.+|$1|g' ) | tee -a "$GITHUB_OUTPUT"
-          ( echo -n "arm64=" && echo ${{ needs.build-arm64.outputs.build-cache-name }} | perl -pe 's|^ghcr.io/${{ github.repository_owner }}/([^:]+):.+|$1|g' ) | tee -a "$GITHUB_OUTPUT"
 
       - uses: actions/delete-package-versions@v4
         continue-on-error: true
         with:
-          package-name: ${{ steps.build-cache-name-2.outputs.amd64 }}
-          package-type: "container"
-          min-versions-to-keep: 0
-
-      - uses: actions/delete-package-versions@v4
-        continue-on-error: true
-        with:
-          package-name: ${{ steps.build-cache-name-2.outputs.arm64 }}
+          package-name: ${{ needs.meta-data.outputs.build-cache-pkg-name }}
           package-type: "container"
           min-versions-to-keep: 0
 
